@@ -1,0 +1,85 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+
+namespace CognitoApi.Controllers
+{
+    [Route("api/[controller]")]
+    public class CognitoUserController : Controller
+    {
+        CognitoHelper cognitoHelper;
+
+        IConfiguration iconfiguration;
+        public CognitoUserController(IConfiguration configuration)
+        {
+            iconfiguration = configuration;
+            cognitoHelper = new CognitoHelper(iconfiguration);
+        }
+
+        [HttpGet("signin")]
+        public async Task<JsonResult> SignIn(User user)
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.AuthnicateUser(user.Email, user.Password);
+            return Json(new { Data = result.Data, Status = result.Status, Message = result.Message });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> Get(User user)
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.GetUserDetails(user.Username, user.Password);
+            return Json(new { Data = result.Data, Status = result.Status, Message = result.Message });
+        }
+
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            return "value: " + id;
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> Post([FromBody] User user)
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.SignUpUser(user);
+            return Json(new { Data = user, Status = result.Status, Message = result.Message });
+        }
+
+        [HttpPut("UpdateUserDetail")]
+        public async Task<JsonResult> Put([FromBody] User user)
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.UpdateUserDetails(user);
+            return Json(new { Data = user, Status = result.Status, Message = result.Message });
+        }
+
+        [HttpDelete]
+        public async Task<JsonResult> Delete()
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.DeleteUser();
+            return Json(new { Status = result.Status, Message = result.Message });
+        }
+
+        [HttpPost("VerifyAccessCode")]
+        public async Task<JsonResult> VerifyAccessCode([FromBody] User user)
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.VerifyAccessCode(user);
+            return Json(new { Data = user, Status = result.Status, Message = result.Message });
+        }
+
+        [HttpDelete("DeleteunConfirmedUser")]
+        public async Task<JsonResult> DeleteunConfirmedUser(User user)
+        {
+            RequestResult result = new RequestResult();
+            result = await cognitoHelper.DeleteUnConfirmedUser(user.Username, user.Password);
+            return Json(new { Data = user, Status = result.Status, Message = result.Message });
+        }
+    }
+}
