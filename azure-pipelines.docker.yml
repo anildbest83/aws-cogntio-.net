@@ -11,6 +11,11 @@ pool:
 
 steps:
 - script: echo Hello, world!
+- task: Docker@2
+  inputs:
+    containerRegistry: 'TestDpckerService'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
   displayName: 'Run a one-line script'
 
 - script: |
